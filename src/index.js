@@ -10,7 +10,7 @@ import {
 } from 'amazon-cognito-identity-js';
 
 const userPool = new CognitoUserPool({
-    UserPoolId: aws_config.UserPoolId,
+    UserPoolId: aws_config.userPoolId,
     ClientId: aws_config.clientId
 });
 
@@ -105,7 +105,7 @@ const getCurrentUser = () => {
 const registerBtn = document.querySelector('button.register')
 const registerRequestPayload = {
     email: "bopog79912@990ys.com",
-    password: "test123",
+    password: "test123$%",
     website: "jkan.pl"
 };
 
@@ -119,7 +119,7 @@ registerBtn.addEventListener('click', () => {
 
 const confirmAccountBtn = document.querySelector('button.confirmAccount');
 const confirmAccountRequest = {
-    code: "843865",
+    code: "286482",
     email: registerRequestPayload.email,
 }
 
@@ -143,6 +143,6 @@ loginBtn.addEventListener('click', () => {
 
 (() => {
     getCurrentUser()
-        .then(username => hello(profile.email))
+        .then(profile => hello(profile.email))
         .catch(hello('Guest'));
 })();
