@@ -8,8 +8,8 @@ import {
   AuthenticationDetails,
 } from "amazon-cognito-identity-js";
 
-import S3 from "aws-sdk/clients/s3";
 import AWS from "aws-sdk/global";
+import S3 from "aws-sdk/clients/s3";
 import { CognitoIdentityCredentials } from "aws-sdk/global";
 import { uuid } from "uuidv4";
 
@@ -151,7 +151,7 @@ const getAccessToken = () => {
         reject(err);
       }
 
-      resolve(session.getIdToken().getJwtToken);
+      resolve(session.getIdToken().getJwtToken());
     });
   });
 };
@@ -174,7 +174,7 @@ const listFiles = () => {
         Bucket: aws_config.bucketName,
         MaxKeys: 10,
       },
-      (err, datae) => {
+      (err, data) => {
         if (err) {
           reject(err);
         }
@@ -192,7 +192,7 @@ const listFiles = () => {
   });
 };
 
-const uploadToS3 = (file) => {
+const uploadToS3 = (userId, file, onProgress) => {
   return new Promise((resolve, reject) => {
     const destKey = `uek-krakow/${userId}/images/${uuid()}/${file.name}`;
     const params = {
@@ -206,10 +206,12 @@ const uploadToS3 = (file) => {
       if (err) {
         reject(err);
       }
-      resolve(data);
+      resolve(destKey);
     }).on("httpUploadProgress", (progress) => {
-      const currentProgress =
-        Math.round(progress.loaded / progress.total) * 100;
+      const currentProgress = Math.round(
+        (progress.loaded / progress.total) * 100
+      );
+      onProgress(currentProgress);
       console.log(`Current progress is: ${currentProgress}%`);
     });
   });
@@ -242,13 +244,13 @@ const orderAnimation = (token, orderRequest) => {
 const createELementFromString = (template) => {
   const parent = document.createElement("div");
   parent.innerHTML = template.trim();
-  return parent.firstChild();
+  return parent.firstChild;
 };
 
 const addToUploadedPreview = (url) => {
   const itemTemplate = `
     <li>
-    <img src="${url}" width="200" />
+      <img src="${url}" width="200"/>
     </li>`;
   const el = createELementFromString(itemTemplate);
   const uploadedList = document.querySelector(".uploadedPreview");
@@ -257,7 +259,7 @@ const addToUploadedPreview = (url) => {
 
 const clearUploadArea = (filesInput, progressBarEl) => {
   progressBarEl.style.width = `0%`;
-  progressBarEl.textConten = `0%`;
+  progressBarEl.textContent = `0%`;
   filesInput.value = "";
 };
 
@@ -310,14 +312,14 @@ uploadFileBtn.addEventListener("click", () => {
     return;
   }
 
-  const progressBarEl = document.querySelector(".uploadProgress");
+  const progressBarEl = document.querySelector(".uploadProgressBar");
 
   const toBeUploadedFiles = [...filesInput.files];
   const userId = AWS.config.credentials.identityId;
 
   toBeUploadedFiles.forEach((file, index) => {
     uploadToS3(userId, file, (currentProgress) => {
-      progressBarEl.style.width = `${currentProgress}`;
+      progressBarEl.style.width = `${currentProgress}%`;
       progressBarEl.textContent = `Uploading... ${currentProgress} %`;
     })
       .then((res) => addToOrder(res))
@@ -342,12 +344,13 @@ orderAnimationBtn.addEventListener("click", () => {
 const cancelOrderBtn = document.querySelector("button.cancelOrder");
 cancelOrderBtn.addEventListener("click", () => {
   order = [];
-})(() => {
-  loadSavedCredentials()
-    .then((session) => refreshAwsCredentials(session))
-    .catch((err) => console.log("Can't reload credentials"));
-
+});
+(() => {
   getCurrentUser()
     .then((profile) => hello(profile.email))
     .catch((err) => hello("Guest"));
+
+  loadSavedCredentials()
+    .then((session) => refreshAwsCredentials(session))
+    .catch((err) => console.log(err));
 })();
