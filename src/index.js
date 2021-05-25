@@ -1,3 +1,6 @@
+import miniCss from "mini.css/dist/mini-nord.css";
+import mainCss from "./styles/main.css";
+
 import { hello } from "./greet";
 import { aws_config } from "./aws_export";
 
@@ -229,14 +232,16 @@ const getPresignedUrl = (key) => {
 };
 
 // Ordering
-const orderAnimation = (token, orderRequest) => {
-  return fetch(`${aws_config.apiBaseUrl}/orders`, {
-    method: "POST",
-    headers: {
-      Authorization: token,
-      "Content-type": "application/json",
-    },
-    body: JSON.stringify(orderRequest),
+const orderAnimation = (orderAnimationRequest) => {
+  getAccessToken().then((token) => {
+    fetch(`${aws_config.apiBaseUrl}/orders`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token,
+      },
+      body: JSON.stringify(orderAnimationRequest),
+    }).then((response) => console.log(response.json()));
   });
 };
 
@@ -335,8 +340,7 @@ orderAnimationBtn.addEventListener("click", () => {
     email: registerRequestPayload.email,
     photos: [...order],
   };
-  getAccessToken()
-    .then((token) => orderAnimation(token, orderRequest))
+  orderAnimation(orderRequest)
     .then((resp) => console.log(resp.json()))
     .catch((err) => console.log(err));
 });

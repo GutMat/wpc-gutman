@@ -1,0 +1,10 @@
+.uploadProgressContainer {
+  min-height: 3rem;
+  background-color: lightgrey;
+}
+
+.uploadProgressBar {
+  min-height: 3rem;
+  background-color: yellow;
+  width: 0%;
+}
