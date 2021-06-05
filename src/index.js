@@ -232,16 +232,14 @@ const getPresignedUrl = (key) => {
 };
 
 // Ordering
-const orderAnimation = (orderAnimationRequest) => {
-  getAccessToken().then((token) => {
-    fetch(`${aws_config.apiBaseUrl}/orders`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token,
-      },
-      body: JSON.stringify(orderAnimationRequest),
-    }).then((response) => console.log(response.json()));
+const orderAnimation = (token, orderRequest) => {
+  return fetch(`${aws_config.apiBaseUrl}/orders`, {
+    method: "POST",
+    headers: {
+      Authorization: token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(orderRequest),
   });
 };
 
@@ -270,7 +268,7 @@ const clearUploadArea = (filesInput, progressBarEl) => {
 
 const registerBtn = document.querySelector("button.register");
 const registerRequestPayload = {
-  email: "bopog79912@990ys.com",
+  email: "gutmateusz96@gmail.com",
   password: "test123$%",
   website: "jkan.pl",
 };
@@ -283,7 +281,7 @@ registerBtn.addEventListener("click", () => {
 
 const confirmAccountBtn = document.querySelector("button.confirmAccount");
 const confirmAccountRequest = {
-  code: "286482",
+  code: "080246",
   email: registerRequestPayload.email,
 };
 confirmAccountBtn.addEventListener("click", () => {
@@ -340,21 +338,21 @@ orderAnimationBtn.addEventListener("click", () => {
     email: registerRequestPayload.email,
     photos: [...order],
   };
-  orderAnimation(orderRequest)
+  getAccessToken()
+    .then((token) => orderAnimation(token, orderRequest))
     .then((resp) => console.log(resp.json()))
     .catch((err) => console.log(err));
 });
-
 const cancelOrderBtn = document.querySelector("button.cancelOrder");
 cancelOrderBtn.addEventListener("click", () => {
   order = [];
 });
 (() => {
+  loadSavedCredentials()
+    .then((session) => refreshAwsCredentials(session))
+    .catch((err) => console.log("cant reload credentials"));
+
   getCurrentUser()
     .then((profile) => hello(profile.email))
     .catch((err) => hello("Guest"));
-
-  loadSavedCredentials()
-    .then((session) => refreshAwsCredentials(session))
-    .catch((err) => console.log(err));
 })();
